@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type="text/javascript">
+        /**
+         *  XMLHttpRequest Hooking 
+         */
+
+        var originSendFunc;
+        if (window.XMLHttpRequest) {
+            originSendFunc = window.XMLHttpRequest.prototype.send;
+
+            window.XMLHttpRequest.prototype.send = function send() {
+                var originOnreadystatechange = this.onreadystatechange;
+                if (originOnreadystatechange) { // not null, already have
+                    this.onreadystatechange = function () {
+                        console.log('[hook] onreadystatechange hook, originOnreadystatechange is not null.');
+                        originOnreadystatechange.apply(this);
+                    }
+                } else {
+                    this.onreadystatechange = function () {
+                        console.log('[hook] onreadystatechange hook, originOnreadystatechange is not null.');
+                    }
+                }
+                originSendFunc.apply(this);
+            }
+        }
+    </script>
+    <script src="./jquery-1.12.4.min-fixed.js"></script>
+</head>
+
+<body>
+    <button type="button" onclick="xhrTest();">xhrTest</button>
+    <button type="button" onclick="ajaxTest();">ajaxTest</button>
+
+    <script type="text/javascript">
+        function xhrTest() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', './poo');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    console.log('[done] xhr');
+                }
+            }
+            xhr.send();
+        }
+
+        function ajaxTest() {
+            if (jQuery) {
+                $.ajax({
+                    url: './poo',
+                    type: 'get',
+                    success: function () {
+                        console.log('[done] success in ajax');
+                    },
+                    error: function () {
+                        console.log('[done] error in ajax');
+                    }
+                })
+            } else {
+                alert('jQuery is undefined.');
+            }
+        }
+    </script>
+</body>
+
+</html>
